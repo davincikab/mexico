@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet</title>
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+   
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" 
+  integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+</head>
+<style>
+    body {
+        margin:0;
+    }
+
+    #map {
+        height: 100vh;
+        width:100%;
+    }
+
+    /* custom popup content */
+    .popup-content{
+        box-shadow: 1px 1px 0.2em #343434;
+    }
+
+    .popup-content .header{
+        padding: 5px;
+        color:#3a3939;
+        font-weight:bold;
+        text-align: center;
+        font-size: 1em;
+        margin: 0;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .popup-content .header .fa {
+        font-size: 1.8em;
+    }
+
+    .leaflet-popup-content p {
+        /* text-align: center; */
+        margin: 0 0 8px 0;
+    }
+
+    .leaflet-popup-content p > b {
+        /* font-size: 0.8em; */
+        margin-right: 1em;
+    }
+
+    .leaflet-popup-content{
+        margin: 0 !important;
+    }
+    .leaflet-popup-content-wrapper{
+        /*padding: 0px !important;*/
+        overflow: hidden;
+        border-radius: 0;
+        background-color: #ffffff;
+    }
+    .leaflet-popup-content-wrapper .leaflet-popup-content{
+        width: 280px;
+    }
+
+    .leaflet-popup-close-button{
+        color:#3a3939 !important;
+        font-size: 1.2em;
+    }
+
+    .legend {
+        color:#fff;
+    }
+
+    .outer-box {
+        display: flex;
+        text-align: center;
+    }
+
+    .box {
+        padding:1em 2em;
+    }
+
+    .outer-box small {
+        margin: 4px 0 0 10px;
+        font-size: 1em;
+    }
+
+    .red {
+        background-color: red;
+    }
+
+    .green {
+        background-color: green;
+    }
+
+    .beige {
+        background-color: beige;
+    }
+
+    .leaflet-container {
+        background-color: #fff;
+    }
+
+    .leaflet-marker-icon.leaflet-div-icon {
+        background-color: transparent;
+        border: none;
+        margin-top: -10px !important;
+        margin-left: -10px !important;
+        width: 24px !important;
+        display: inline-flex;
+    }
+
+    .labels {
+        color:#00000070;
+        font-size: 0.69em;
+        text-transform: uppercase;
+    }
+
+    .title {
+        position: absolute;
+        top:2%;
+        right:10%;
+        font-weight: 900;
+        font-size: 2em;
+        color:#C1C1C1;
+        z-index: 1000;
+    }
+
+    /* Card section */
+    .list{
+        height: auto;
+        overflow: auto;
+        max-height: 160px;
+    }
+    .card {
+        /* display: none; */
+        box-shadow: 2px 2px 0.4em #2e2e2e;
+        margin: 0.4em;
+        padding: 0.3em;
+    }
+
+    .card-title {
+        font-size: 1em;
+        margin: 0.5em;
+        font-weight: 900;
+    }
+
+    .card-body {
+        padding: 0 0.3em;
+    }
+    .card-body > p{
+        /* display: flex;
+        justify-content: space-between; */
+    }
+
+    .card-body > p >small {
+        font-size: 0.99em;
+    }
+</style>
+<body>
+    <div id="map">
+    </div>
+
+    
+    <div class="title">
+        <h3 id="text-year">Suppliers</h3>
+    <div>
+
+    <!-- embed -->
+    <!-- <iframe src="https://davincikab.github.io/funding_webmap/all.html" frameborder="0" height="400" width="100%"></iframe> -->
+    <script src="js/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+    <script>
+        var activeIndex;
+        var cardCount;
+
+        // Creating map object
+        var map = L.map("map", {
+            center: [23.946096014998382, -102.54638671875001],
+            zoom: 10,
+            minZoom:4,
+            zoomDelta:0.5
+        });
+
+        // Adding tile layer
+
+        var layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
+            attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            minZoom: 0
+        });
+
+        layer.addTo(map);
+
+        var cartoWhite = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}' + (L.Browser.retina ? '@2x.png' : '.png'), {
+            attribution:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            minZoom: 0
+        });
+
+        // cartoWhite.addTo(map);
+
+        baseLayers ={
+            'Carto Dark':layer
+        };
+
+        var mexico = L.geoJson(null, {
+            style:function(feature) {
+                return {
+                    fillColor:stylemexico(feature),
+                    fillOpacity:0.7,
+                    weight:0.8,
+                    color:'#dddd'
+                }
+            },
+            onEachFeature:function(feature, layer){
+                    // zoom to layer on click
+                    layer.on('mouseover', highLightLayer);
+
+                    layer.on('mouseout',resetLayerStyle);
+                }
+            
+        });
+
+        function stylemexico(feature) {
+            let colors = ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'];
+            let value = feature.properties.suppliers.length;
+
+            // console.log(value +  ':' + feature.properties.ADM1_ES);
+            return value[0] ? '#1b295e' : "#758796";
+            // return  value == 0 ? colors[0]: value < 2 ? colors[1]: value < 3 ? colors[2]: value < 4 ? colors[3] : colors[4];
+        }
+
+
+        mexico.addTo(map);
+
+        // highlight layer
+        function highLightLayer(e) {
+            let layer = e.target;
+            let feature = layer.feature;
+
+            layer.setStyle({
+                fillColor:'#00aee9'
+            });
+
+            let suppliers = feature.properties.suppliers.map(supplier => {
+                        return `<div class="card">
+                                <h5 class="card-title">${supplier.DISTRIBUIDOR}</h5>
+                                <div class="card-body">
+                                    <p><b>ATN</b><small>${supplier.DISTRIBUIDOR}</small></p>
+                                    <p><strong>Mail 2</strong><br><small>${supplier['Mail 1']}</small></p>
+                                    <p><strong>Mail 2</strong><br><small>${supplier['Mail 1']}</small></p>
+                                    <p><b>DIRECCIÓN</b><small>${supplier['DIRECCIÓN']}</small></p>
+                                    <p><b>TELEFONO</b><small>${supplier['TELEFONO']}</small></p>
+                                </div>
+                                </div>`;
+                    });
+
+                    // add popup
+                    let popupContent = "<div class='popup-content'>"+
+                                "<h5 class='header'>"+ feature.properties.ADM1_ES +"</h5>"+
+                                "</div><div class='list'>" + suppliers.toString().replace(/,/g, "") +"</div>";
+
+                    // console.log(popupContent);
+                    
+            layer.bindPopup(popupContent).openPopup();      
+        }
+
+        function resetLayerStyle(e) {
+            let layer = e.target;
+            layer.setStyle({
+                fillColor:stylemexico(layer.feature)
+            });
+
+        }
+
+        fetch('distributaries.json')
+            .then(res =>  res.json())
+            .then(data => {
+                loadGeoData(data);
+            })
+            .catch(error => {
+                alert(error);
+            });
+        
+        function loadGeoData(interData) {
+            var total = interData.length;
+            fetch('states.geojson')
+            .then(res => res.json())
+            .then(data => {
+
+                // Update with json inform
+                data.features.forEach(feature => {
+                    let suppliers = interData.filter(datum => datum["State"] == feature.properties.ADM1_ES);
+
+                    feature.properties.suppliers = suppliers;
+                    return feature;
+                });
+                
+                console.log(data);
+                // get the rates
+                mexico.addData(data);
+                map.fitBounds(mexico.getBounds());
+                // map.setMaxBounds(mexico.getBounds());
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+    </script>
+</body>
+
+</html>
