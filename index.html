@@ -170,6 +170,45 @@
     .card-body > p >small {
         font-size: 0.99em;
     }
+
+    .legend {
+    display:flex;
+    color:#fff;
+  }
+  .icon {
+    width:20px;
+    height:20px;
+    border-radius:10px;
+    margin-right:1em;
+  }
+
+  .icon-gray {
+    background-color:#758796;
+  }
+  .icon-blue {
+    margin-left:1em;
+    background-color:#1b295e;
+  }
+
+  /* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 </style>
 <body>
     <div id="map">
@@ -246,7 +285,7 @@
             let value = feature.properties.suppliers.length;
 
             // console.log(value +  ':' + feature.properties.ADM1_ES);
-            return value[0] ? '#1b295e' : "#758796";
+            return value > 0 ? '#1b295e' : "#758796";
             // return  value == 0 ? colors[0]: value < 2 ? colors[1]: value < 3 ? colors[2]: value < 4 ? colors[3] : colors[4];
         }
 
@@ -326,6 +365,17 @@
                 console.log(error);
             });
         }
+
+        var legendControl = new L.control({position:'bottomleft'});
+        legendControl.onAdd = function(map) {
+            let div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = "<div class='icon icon-gray'></div> Covered States"+
+                    "<div class='icon icon-blue'></div> nonCovered States";
+
+            return div;
+        };
+
+        map.addControl(legendControl);
     </script>
 </body>
 
